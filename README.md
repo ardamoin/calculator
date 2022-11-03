@@ -1,1 +1,1 @@
-A web calculator. The final foundations project for TOP.
+A web calculator. The final foundations course project for TOP.
