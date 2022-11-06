@@ -1,3 +1,10 @@
+let displayText = document.querySelector(".display");
+const numberDivs = document.querySelectorAll('.number');
+const clearButton = document.querySelector(".clear");
+const operators = document.querySelectorAll(".operator");
+const decimal = document.querySelector(".dot");
+const operatorKeys = ["%", "/", "+", "-", "x"];
+
 function add(...args) {
     return args.reduce((total, current) => {
         return total + current;
@@ -32,7 +39,9 @@ function divide(numerator, ...args) {
     }, numerator);
 }
 
-function operate(operator, num1, num2) {
+function operate(num1, operator, num2) {
+    num1 = +num1;
+    num2 = +num2;
     switch (operator) {
         case '+':
             return add(num1, num2);
@@ -40,7 +49,7 @@ function operate(operator, num1, num2) {
         case '-':
             return subtract(num1, num2);
 
-        case '*':
+        case 'x':
             return multiply(num1, num2);
 
         case '/':
@@ -67,20 +76,23 @@ function clearDisplay() {
     displayText.textContent = "";
 }
 
+function myEval(expression) {
+    let total = 0;
+    expression = expression.replace(/\s/g, ""); // removes empty spaces from expression
+    let matchedArray = expression.match(/[+\-\x\/]*(\.\d+|\d+(\.\d+)?)/g);
 
-let displayText = document.querySelector(".display");
-const numberDivs = document.querySelectorAll('.number');
-const clearButton = document.querySelector(".clear");
-const operators = document.querySelectorAll(".operator");
-const decimal = document.querySelector(".dot");
-const operatorKeys = ["%", "/", "+", "-", "x"];
+    while (matchedArray.length) {
+        const firstChar = operatorKeys.includes(matchedArray[0].charAt(0)) ? matchedArray[0].charAt(0) : "+";
+        total = operate(total, firstChar, matchedArray.shift());
+    }
 
+    return total;
+}
 
 
 [...numberDivs, ...operators, decimal].forEach(button => {
     button.addEventListener('click', updateText);
 });
-
 
 
 clearButton.addEventListener('click', () => {
