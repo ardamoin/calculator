@@ -1,8 +1,3 @@
-let displayText = document.querySelector(".display");
-const numberDivs = document.querySelectorAll('.number');
-const clearButton = document.querySelector(".clear");
-const operators = document.querySelectorAll(".operator");
-const decimal = document.querySelector(".dot");
 const operatorKeys = ["%", "/", "+", "-", "x"];
 
 function add(...args) {
@@ -40,8 +35,8 @@ function divide(numerator, ...args) {
 }
 
 function operate(num1, operator, num2) {
-    num1 = +num1;
-    num2 = +num2;
+    num1 = Math.abs(Number(num1));
+    num2 = Math.abs(Number(num2));
     switch (operator) {
         case '+':
             return add(num1, num2);
@@ -83,16 +78,26 @@ function myEval(expression) {
 
     while (matchedArray.length) {
         const firstChar = operatorKeys.includes(matchedArray[0].charAt(0)) ? matchedArray[0].charAt(0) : "+";
-        total = operate(total, firstChar, matchedArray.shift());
+        total = operate(total, firstChar, matchedArray.shift().replace(/[\+\-\x\/]/g,''));
     }
 
     return total;
 }
 
 
+let displayText = document.querySelector(".display");
+const numberDivs = document.querySelectorAll('.number');
+const clearButton = document.querySelector(".clear");
+const operators = document.querySelectorAll(".operator");
+const decimal = document.querySelector(".dot");
+
+
+
+
 [...numberDivs, ...operators, decimal].forEach(button => {
     button.addEventListener('click', updateText);
 });
+
 
 
 clearButton.addEventListener('click', () => {
