@@ -1,42 +1,35 @@
 const operatorKeys = ["%", "/", "+", "-", "x"];
+let displayText = document.querySelector(".display");
+const numberDivs = document.querySelectorAll('.number');
+const clearButton = document.querySelector(".clear");
+const operators = document.querySelectorAll(".operator");
+const decimal = document.querySelector(".dot");
+const equalsButton = document.querySelector(".equals");
 
-function add(...args) {
-    return args.reduce((total, current) => {
-        return total + current;
-    }, 0);
+function add(num1, num2) {
+    return num1 + num2;
 }
 
 
-function subtract(subtractFrom, ...args) {
-
-    subtractFrom = (typeof subtractFrom === 'undefined') ? 0 : subtractFrom;
-
-    return args.reduce((total, current) => {
-        return total - current;
-    }, subtractFrom);
+function subtract(num1, num2) {
+    return num1 - num2;
 }
 
-function multiply(...args) {
-
-    if(args.length === 0){return 0};
-
-    return args.reduce((total, current) => {
-        return total * current;
-    }, 1);
+function multiply(num1, num2) {
+    return num1 * num2;
 }
 
-function divide(numerator, ...args) {
+function divide(num1, num2) {
+    return num1 / num2;
+}
 
-    numerator = (typeof numerator === 'undefined') ? 0 : numerator;
-
-    return args.reduce((total, current) => {
-        return total / current;
-    }, numerator);
+function mod(num1, num2) {
+    return num1 % num2;
 }
 
 function operate(num1, operator, num2) {
-    num1 = Math.abs(Number(num1));
-    num2 = Math.abs(Number(num2));
+    num1 = Number(num1);
+    num2 = Number(num2);
     switch (operator) {
         case '+':
             return add(num1, num2);
@@ -49,6 +42,9 @@ function operate(num1, operator, num2) {
 
         case '/':
             return divide(num1, num2);
+        
+        case '%':
+            return mod(num1, num2);
     }
 }
 
@@ -74,30 +70,29 @@ function clearDisplay() {
 function myEval(expression) {
     let total = 0;
     expression = expression.replace(/\s/g, ""); // removes empty spaces from expression
-    let matchedArray = expression.match(/[+\-\x\/]*(\.\d+|\d+(\.\d+)?)/g);
+    let matchedArray = expression.match(/[+\-\x\/\%]*(\.\d+|\d+(\.\d+)?)/g);
 
     while (matchedArray.length) {
         const firstChar = operatorKeys.includes(matchedArray[0].charAt(0)) ? matchedArray[0].charAt(0) : "+";
-        total = operate(total, firstChar, matchedArray.shift().replace(/[\+\-\x\/]/g,''));
+        total = operate(total, firstChar, matchedArray.shift().replace(/[\+\-\x\/\%]/,''));
     }
 
     return total;
 }
 
-
-let displayText = document.querySelector(".display");
-const numberDivs = document.querySelectorAll('.number');
-const clearButton = document.querySelector(".clear");
-const operators = document.querySelectorAll(".operator");
-const decimal = document.querySelector(".dot");
-
-
+function updateResult(expression) {
+    clearDisplay;
+    displayText.textContent = myEval(expression);
+}
 
 
 [...numberDivs, ...operators, decimal].forEach(button => {
     button.addEventListener('click', updateText);
 });
 
+equalsButton.addEventListener('click', () => {
+    updateResult(displayText.textContent);
+})
 
 
 clearButton.addEventListener('click', () => {
@@ -125,6 +120,8 @@ window.addEventListener('keypress', function(e) {
 window.addEventListener('keydown', (e) => {
     if (e.key === "Backspace") {
         displayText.textContent = displayText.textContent.slice(0, -1);
+    } else if (e.key === "Enter") {
+        updateResult(displayText.textContent);
     } else if (e.key === "Escape") {
         clearDisplay();
     }
