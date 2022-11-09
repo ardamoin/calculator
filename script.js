@@ -1,7 +1,9 @@
 const operatorKeys = ["%", "/", "+", "-", "x"];
 let displayText = document.querySelector(".display");
+let calculationText = document.querySelector(".calculation");
 const numberDivs = document.querySelectorAll('.number');
 const clearButton = document.querySelector(".clear");
+const allClearButton = document.querySelector(".all-clear");
 const operators = document.querySelectorAll(".operator");
 const decimal = document.querySelector(".dot");
 const equalsButton = document.querySelector(".equals");
@@ -67,6 +69,10 @@ function clearDisplay() {
     displayText.textContent = "";
 }
 
+function clearCalculation() {
+    calculationText.textContent = "";
+}
+
 function myEval(expression) {
     let total = 0;
     expression = expression.replace(/\s/g, ""); // removes empty spaces from expression
@@ -99,6 +105,11 @@ clearButton.addEventListener('click', () => {
     clearDisplay();
 })
 
+allClearButton.addEventListener('click', () => {
+    clearDisplay();
+    clearCalculation();
+})
+
 window.addEventListener('keypress', function(e) {
     console.log("You pressed " + doWhichKey(e));
     let key = doWhichKey(e)
@@ -123,6 +134,10 @@ window.addEventListener('keydown', (e) => {
     } else if (e.key === "Enter") {
         updateResult(displayText.textContent);
     } else if (e.key === "Escape") {
+        if (displayText.textContent === "") {
+            clearCalculation();
+        }
+
         clearDisplay();
     }
 })
