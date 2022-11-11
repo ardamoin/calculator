@@ -6,10 +6,10 @@ const numberDivs = document.querySelectorAll('.number');
 const clearButton = document.querySelector(".clear");
 const allClearButton = document.querySelector(".all-clear");
 const operators = document.querySelectorAll(".operator");
-const decimal = document.querySelector(".dot");
 const equalsButton = document.querySelector(".equals");
 let reset = false;
-const calculationExp = /^[0-9]\d*(\.\d+)?[+\-\x\/\%]$/;
+const calculationExp = /^[0-9]\d*(\.\d+)?\s[+\-\x\/\%]\s$/;
+const numsAndOperators = [...numberDivs, ...operators];
 
 function add(num1, num2) {
     return num1 + num2;
@@ -66,39 +66,18 @@ function myEval(expression) {
     return total;
 }
 
-/**
- * Start with zero
- * 
- * When entered a number, replace zero with that number, 
- * when an operator is called write initial number + operator to calculation field
- * 
- * 
- * 
- */
-
-numberDivs.forEach(number => {
-    number.addEventListener('mousedown', () => {
-        //console.log(number.textContent);
-        if (reset) {
-            displayText.textContent = number.textContent;
-        } else {
-            displayText.textContent += number.textContent;
-        }
-    })
-})
-
 window.addEventListener('keydown', function(e) {
-    e.key = (e.key === "Shift") ? "" : e.key;
-    //console.log(e.key);
+    e.key = (e.key === "Shift") ? "" : e.key; // to ignore shift key
+
     if (!reset && keys.includes(e.key)) {
         displayText.textContent += e.key;
     } else if (operatorKeys.includes(e.key) && !reset) {
         reset = true;
 
         if (calculationExp.test(calculationText.textContent)) {
-            calculationText.textContent = myEval(calculationText.textContent + displayText.textContent) + e.key;
+            calculationText.textContent = myEval(calculationText.textContent + displayText.textContent) + " " + e.key + " ";
         } else {
-            calculationText.textContent += displayText.textContent + e.key;
+            calculationText.textContent += displayText.textContent + " " + e.key + " ";
         }
 
     } else if(reset && keys.includes(e.key)) {
@@ -108,36 +87,49 @@ window.addEventListener('keydown', function(e) {
 
     if (e.key === "Backspace") {
         displayText.textContent = displayText.textContent.slice(0, -1);
-    } else if (e.key === "Escape" && displayText.textContent !== "") {
-        displayText.textContent = "";
-    } else if (e.key === "Escape" && displayText.textContent === "") {
+    } else if (e.key === "Escape" && calculationText.textContent !== "") {
         calculationText.textContent = "";
-    } else if (e.key === "Enter") {
-
+    } else if (e.key === "Escape" && calculationText.textContent === "") {
+        displayText.textContent = "";
+    } else if (e.key === "Enter" || e.key === "=") {
+        if (!calculationText.textContent.includes("=")){
+            calculationText.textContent +=  displayText.textContent + " = " + myEval(calculationText.textContent + displayText.textContent);
+        }
     }
 })
 
+numsAndOperators.forEach(item => {
+    item.addEventListener('mousedown', () => {
+        console.log(item);
+        if (!reset && keys.includes(item.textContent)) {
+            displayText.textContent += item.textContent;
+        } else if (operatorKeys.includes(item.textContent) && !reset) {
+            reset = true;
+    
+            if (calculationExp.test(calculationText.textContent)) {
+                calculationText.textContent = myEval(calculationText.textContent + displayText.textContent) + " " + item.textContent + " ";
+            } else {
+                calculationText.textContent += displayText.textContent + " " + item.textContent + " ";
+            }
+    
+        } else if(reset && keys.includes(item.textContent)) {
+            displayText.textContent = item.textContent;
+            reset = false;
+        }
+    })
+})
 
+clearButton.addEventListener('mousedown', () => {
+    calculationText.textContent = "";
+})
 
+allClearButton.addEventListener('mousedown', () => {
+    calculationText.textContent = "";
+    displayText.textContent = "";
+})
 
-
-
-
-
-
-/**
- * if (!reset && keys.includes(e.key)) {
-        displayText.textContent += e.key;
-    } else if (operatorKeys.includes(e.key) && !reset) {
-        //debugger;
-        reset = true;
-        calculationText.textContent += displayText.textContent + e.key;
-    } else if(reset && keys.includes(e.key)) {
-        //debugger;
-        displayText.textContent = e.key;
-        reset = false;
-    } else if (calculationExp.test(calculationText.textContent)) {
-        //debugger;
-        calculationText.textContent = myEval(calculationText.textContent + displayText.textContent) + e.key;
+equalsButton.addEventListener('mousedown', () => {
+    if (!calculationText.textContent.includes("=")){
+        calculationText.textContent +=  displayText.textContent + " = " + myEval(calculationText.textContent + displayText.textContent);
     }
- */
+})
