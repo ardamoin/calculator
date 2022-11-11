@@ -8,7 +8,7 @@ const allClearButton = document.querySelector(".all-clear");
 const operators = document.querySelectorAll(".operator");
 const equalsButton = document.querySelector(".equals");
 let reset = false;
-const calculationExp = /^[0-9]\d*(\.\d+)?\s[+\-\x\/\%]\s$/;
+const calculationExp = /^\-?[0-9]\d*(\.\d+)?\s[+\-\x\/\%]\s$/;
 const numsAndOperators = [...numberDivs, ...operators];
 
 function add(num1, num2) {
@@ -63,6 +63,10 @@ function myEval(expression) {
         total = operate(total, firstChar, matchedArray.shift().replace(/[\+\-\x\/\%]/,''));
     }
 
+    if (total === Infinity) {
+        return "Can't divide by 0 you DONUT";
+    }
+
     return total;
 }
 
@@ -71,8 +75,30 @@ function isNumeric(str) {
     return !isNaN(str) && !isNaN(parseFloat(str))
 }
 
-function inputLogic(input) {
-    
+function interpretInput(input) {
+    if (calculationText.textContent.includes("=") || displayText.textContent.includes("DONUT")) {
+        calculationText.textContent = "";
+    };
+
+    if (!reset && keys.includes(input) && isNumeric(displayText.textContent + input)) {
+        displayText.textContent += input;
+    } else if (operatorKeys.includes(input) && !reset) {
+        reset = true;
+
+        if (calculationExp.test(calculationText.textContent)) {
+            calculationText.textContent = myEval(calculationText.textContent + displayText.textContent) + " " + input + " ";
+        } else if (!calculationExp.test(calculationText.textContent) && displayText.textContent !== "") {
+            calculationText.textContent += displayText.textContent + " " + input + " ";
+        } else if(input === "-") {
+            displayText.textContent = input;
+        }
+
+    } else if(reset && keys.includes(input) && isNumeric(displayText.textContent + input)) {
+        displayText.textContent = (displayText.textContent === "-") ? "-" + input : input;
+        reset = false;
+    } else if (reset && operatorKeys.includes(input)) {
+        calculationText.textContent = calculationText.textContent.slice(0,-2) + input + " ";
+    }
 }
 
 
@@ -80,24 +106,7 @@ function inputLogic(input) {
 
 window.addEventListener('keydown', function(e) {
     e.key = (e.key === "Shift") ? "" : e.key; // to ignore shift key
-
-    if (!reset && keys.includes(e.key) && isNumeric(displayText.textContent + e.key)) {
-        displayText.textContent += e.key;
-    } else if (operatorKeys.includes(e.key) && !reset) {
-        reset = true;
-
-        if (calculationExp.test(calculationText.textContent)) {
-            calculationText.textContent = myEval(calculationText.textContent + displayText.textContent) + " " + e.key + " ";
-        } else if (displayText.textContent !== "") {
-            calculationText.textContent += displayText.textContent + " " + e.key + " ";
-        }
-
-    } else if (operatorKeys.includes(e.key) && reset) {
-        calculationText.textContent = calculationText.textContent.slice(0,-2) + e.key + " ";
-    } else if(reset && keys.includes(e.key)) {
-        displayText.textContent = e.key;
-        reset = false;
-    }
+    interpretInput(e.key);
 
     if (e.key === "Backspace") {
         displayText.textContent = displayText.textContent.slice(0, -1);
@@ -106,32 +115,16 @@ window.addEventListener('keydown', function(e) {
     } else if (e.key === "Escape" && calculationText.textContent === "") {
         displayText.textContent = "";
     } else if (e.key === "Enter" || e.key === "=") {
-        if (!calculationText.textContent.includes("=")){
-            calculationText.textContent +=  displayText.textContent + " = " + myEval(calculationText.textContent + displayText.textContent);
+        if (!calculationText.textContent.includes("=") && operatorKeys.some(key => calculationText.textContent.includes(key))){
+            calculationText.textContent += displayText.textContent + " = ";
+            displayText.textContent = myEval(calculationText.textContent.slice(0,-2));
         }
     }
 })
 
 numsAndOperators.forEach(item => {
     item.addEventListener('mousedown', () => {
-        console.log(item);
-        if (!reset && keys.includes(item.textContent) && isNumeric(displayText.textContent + item.textContent)) {
-            displayText.textContent += item.textContent;
-        } else if (operatorKeys.includes(item.textContent) && !reset) {
-            reset = true;
-    
-            if (calculationExp.test(calculationText.textContent)) {
-                calculationText.textContent = myEval(calculationText.textContent + displayText.textContent) + " " + item.textContent + " ";
-            } else if (displayText.textContent !== "") {
-                calculationText.textContent += displayText.textContent + " " + item.textContent + " ";
-            }
-    
-        } else if (operatorKeys.includes(e.key) && reset) {
-            calculationText.textContent = calculationText.textContent.slice(0,-2) + item.textContent + " ";
-        } else if(reset && keys.includes(item.textContent)) {
-            displayText.textContent = item.textContent;
-            reset = false;
-        }
+        interpretInput(item.textContent);
     })
 })
 
@@ -145,7 +138,10 @@ allClearButton.addEventListener('mousedown', () => {
 })
 
 equalsButton.addEventListener('mousedown', () => {
-    if (!calculationText.textContent.includes("=")){
-        calculationText.textContent +=  displayText.textContent + " = " + myEval(calculationText.textContent + displayText.textContent);
+    if (!calculationText.textContent.includes("=") && operatorKeys.some(key => calculationText.textContent.includes(key))){
+        calculationText.textContent += displayText.textContent + " = ";
+        displayText.textContent = myEval(calculationText.textContent.slice(0,-2));
+    } else if (calculationText.textContent.includes("=") || displayText.textContent.includes("DONUT")) {
+        calculationText.textContent = "";
     }
 })
