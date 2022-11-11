@@ -33,6 +33,7 @@ body, html {
     box-shadow: 0 5px 5px rgba(0, 0, 0, 0.35);
     height: 130px;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .display {
@@ -97,3 +98,26 @@ button:hover {
      inset -2px -2px 5px rgba(235, 235, 235, 0.3),
      inset 2px 2px 4px rgba(0, 0, 0, 0.7);
 }
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    font-size: 20px;
+  }
+  
+  .fa-github {
+    color: #191919;
+    font-size: 24px;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .fa-github:hover {
+    transform: rotate(360deg) scale(1.2);
+  }
