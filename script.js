@@ -1,3 +1,4 @@
+const keys = [...[...Array(10).keys()].map(String), "."];
 const operatorKeys = ["%", "/", "+", "-", "x"];
 let displayText = document.querySelector(".display");
 let calculationText = document.querySelector(".calculation");
@@ -7,6 +8,8 @@ const allClearButton = document.querySelector(".all-clear");
 const operators = document.querySelectorAll(".operator");
 const decimal = document.querySelector(".dot");
 const equalsButton = document.querySelector(".equals");
+let reset = false;
+const calculationExp = /^[0-9]\d*(\.\d+)?[+\-\x\/\%]$/;
 
 function add(num1, num2) {
     return num1 + num2;
@@ -50,29 +53,6 @@ function operate(num1, operator, num2) {
     }
 }
 
-function updateText() {
-    if (operatorKeys.includes(this.textContent)) {
-        displayText.textContent += " " + this.textContent + " "; // if an operator is used, adds empty space on both sides
-    } else {
-        displayText.textContent += this.textContent;
-    }
-}
-
-function doWhichKey(e) { 
-    e = e || window.event; 
-    let charCode = e.keyCode || e.which;
-    return charCode; 
-    // return String.fromCharCode(charCode); 
-} 
-
-function clearDisplay() {
-    displayText.textContent = "";
-}
-
-function clearCalculation() {
-    calculationText.textContent = "";
-}
-
 function myEval(expression) {
     let total = 0;
     expression = expression.replace(/\s/g, ""); // removes empty spaces from expression
@@ -86,58 +66,78 @@ function myEval(expression) {
     return total;
 }
 
-function updateResult(expression) {
-    clearDisplay;
-    displayText.textContent = myEval(expression);
-}
+/**
+ * Start with zero
+ * 
+ * When entered a number, replace zero with that number, 
+ * when an operator is called write initial number + operator to calculation field
+ * 
+ * 
+ * 
+ */
 
-
-[...numberDivs, ...operators, decimal].forEach(button => {
-    button.addEventListener('click', updateText);
-});
-
-equalsButton.addEventListener('click', () => {
-    updateResult(displayText.textContent);
+numberDivs.forEach(number => {
+    number.addEventListener('mousedown', () => {
+        //console.log(number.textContent);
+        if (reset) {
+            displayText.textContent = number.textContent;
+        } else {
+            displayText.textContent += number.textContent;
+        }
+    })
 })
 
+window.addEventListener('keydown', function(e) {
+    e.key = (e.key === "Shift") ? "" : e.key;
+    //console.log(e.key);
+    if (!reset && keys.includes(e.key)) {
+        displayText.textContent += e.key;
+    } else if (operatorKeys.includes(e.key) && !reset) {
+        reset = true;
 
-clearButton.addEventListener('click', () => {
-    clearDisplay();
-})
-
-allClearButton.addEventListener('click', () => {
-    clearDisplay();
-    clearCalculation();
-})
-
-window.addEventListener('keypress', function(e) {
-    console.log("You pressed " + doWhichKey(e));
-    let key = doWhichKey(e)
-    if ((key >= 48 && key <= 57) || key === 46) {
-        displayText.textContent += String.fromCharCode(key); // (48, 57) is keycode range for numbers 0-9. 46 is keycode for decimal (.)
-    } else if (key === 37 || key === 47 || key === 43 || key === 45 || key === 120) {
-        displayText.textContent += " " + String.fromCharCode(key) + " ";
-        // key codes for operators
-        /**
-         * 37: %
-         * 47: /
-         * 43: +
-         * 45: -
-         * 120: x
-         */
-    }
-})
-
-window.addEventListener('keydown', (e) => {
-    if (e.key === "Backspace") {
-        displayText.textContent = displayText.textContent.slice(0, -1);
-    } else if (e.key === "Enter") {
-        updateResult(displayText.textContent);
-    } else if (e.key === "Escape") {
-        if (displayText.textContent === "") {
-            clearCalculation();
+        if (calculationExp.test(calculationText.textContent)) {
+            calculationText.textContent = myEval(calculationText.textContent + displayText.textContent) + e.key;
+        } else {
+            calculationText.textContent += displayText.textContent + e.key;
         }
 
-        clearDisplay();
+    } else if(reset && keys.includes(e.key)) {
+        displayText.textContent = e.key;
+        reset = false;
+    }
+
+    if (e.key === "Backspace") {
+        displayText.textContent = displayText.textContent.slice(0, -1);
+    } else if (e.key === "Escape" && displayText.textContent !== "") {
+        displayText.textContent = "";
+    } else if (e.key === "Escape" && displayText.textContent === "") {
+        calculationText.textContent = "";
+    } else if (e.key === "Enter") {
+
     }
 })
+
+
+
+
+
+
+
+
+
+/**
+ * if (!reset && keys.includes(e.key)) {
+        displayText.textContent += e.key;
+    } else if (operatorKeys.includes(e.key) && !reset) {
+        //debugger;
+        reset = true;
+        calculationText.textContent += displayText.textContent + e.key;
+    } else if(reset && keys.includes(e.key)) {
+        //debugger;
+        displayText.textContent = e.key;
+        reset = false;
+    } else if (calculationExp.test(calculationText.textContent)) {
+        //debugger;
+        calculationText.textContent = myEval(calculationText.textContent + displayText.textContent) + e.key;
+    }
+ */
